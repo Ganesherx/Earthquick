@@ -39,7 +39,6 @@ public final class QueryUtils {
     }
 
 
-
     /**
      * Returns new URl object from the given string url
      **/
@@ -52,16 +51,20 @@ public final class QueryUtils {
             Log.e(LOG_TAG, "Problem building the Url", e);
         }
 
+        Log.e(LOG_TAG, "creating url:" + url);
         return url;
 
     }
 
     private static String makeHttpRequest(URL url) throws IOException {
+        Log.e(LOG_TAG, "makeHttpRequest:");
         String jsonResponse = "";
         //If the url is null , then return early
         if (url == null) {
             return jsonResponse;
         }
+
+        Log.e(LOG_TAG, "makeHttprequest  url:" + url);
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
         try {
@@ -70,6 +73,8 @@ public final class QueryUtils {
             urlConnection.setConnectTimeout(15000);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
+
+            Log.e(LOG_TAG, "http response:" + urlConnection.getResponseCode());
 
             if (urlConnection.getResponseCode() == 200) {
                 inputStream = urlConnection.getInputStream();
@@ -117,38 +122,52 @@ public final class QueryUtils {
         try {
 
             JSONObject baseJsonResponse = new JSONObject(earthquakeJSON);
+            Log.e(LOG_TAG, "baseJsonResponse:" + baseJsonResponse);
+
             JSONArray earthquakeArray = baseJsonResponse.getJSONArray("features");
             for (int i = 0; i < earthquakeArray.length(); i++) {
+
                 JSONObject currentEartquake = earthquakeArray.getJSONObject(i);
                 JSONObject propertise = currentEartquake.getJSONObject("properties");
-                double magnitude=propertise.getDouble("mag");
-                String location=propertise.getString("place");
-                long time=propertise.getLong("time");
-                String url=propertise.getString("url");
+                double magnitude = propertise.getDouble("mag");
+                String location = propertise.getString("place");
+                long time = propertise.getLong("time");
+                String url = propertise.getString("url");
 
-                Earthquake earthquake=new Earthquake(magnitude,location,time,url);
+                Earthquake earthquake = new Earthquake(magnitude, location, time, url);
                 earthquakes.add(earthquake);
 
             }
 
         } catch (JSONException e) {
-         Log.e(LOG_TAG,"Problem parsing the earthquake JSON results.",e);
+            Log.e(LOG_TAG, "Problem parsing the earthquake JSON results.", e);
         }
 
         return earthquakes;
     }
 
-    public static List<Earthquake> fetchEarthquakeData(String requestUrl){
-        URL url=createUrl(requestUrl);
+    public static List<Earthquake> fetchEarthquakeData(String requestUrl) {
 
-        String jsonResponse=null;
-        try{
-            jsonResponse=makeHttpRequest(url);
-        } catch (IOException e) {
-            Log.e(LOG_TAG,"Problem making the HTTO request.",e);
+        Log.i(LOG_TAG, "TEST: fetchEarthquakeData() called...");
+
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
-        List<Earthquake> earthquakes=extractFeatureFromJson(jsonResponse);
+        URL url = createUrl(requestUrl);
+
+        String jsonResponse = null;
+        try {
+            jsonResponse = makeHttpRequest(url);
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "Problem making the HTTO request.", e);
+        }
+
+        Log.e(LOG_TAG, "fetchEartquakedata.jsonresponse:" + jsonResponse);
+
+        List<Earthquake> earthquakes = extractFeatureFromJson(jsonResponse);
 
         return earthquakes;
     }
